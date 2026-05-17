@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tính Lãi Suất Tiết Kiệm & So Sánh Ngân Hàng</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            padding: 20px;
+            overflow-y: auto; 
+        }
+
+        .box {
+            width: 500px;
+            padding: 40px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 25px rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.5s ease-in-out;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 25px;
+            color: #ffffff;
+            font-size: 26px;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+
+        label {
+            color: #e0f7ff;
+            font-size: 15px;
+            display: block;
+            margin-top: 12px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            margin-top: 6px;
+            margin-bottom: 6px;
+            border: none;
+            border-radius: 10px;
+            outline: none;
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            font-size: 15px;
+        }
+
+        input::placeholder {
+            color: #d9d9d9;
+        }
+
+        .btn-group {
+            margin-top: 15px;
+        }
+
+        button {
+            width: 100%;
+            padding: 13px;
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-bottom: 10px;
+        }
+
+        .btn-main {
+            background: linear-gradient(90deg, #00c6ff, #0072ff);
+        }
+
+        .btn-main:hover {
+            transform: scale(1.02);
+            box-shadow: 0 0 20px rgba(0, 114, 255, 0.7);
+        }
+
+        .btn-compare {
+            background: linear-gradient(90deg, #f12711, #f5af19);
+            display: none; 
+        }
+
+        .btn-compare:hover {
+            transform: scale(1.02);
+            box-shadow: 0 0 20px rgba(245, 175, 25, 0.7);
+        }
+
+        .ketqua {
+            margin-top: 15px;
+            color: #ffffff;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        .highlight {
+            color: #00ffd5;
+            font-weight: bold;
+        }
+
+        .highlight-gold {
+            color: #ffeb3b;
+            font-weight: bold;
+        }
+
+        .compare-section {
+            display: none;
+            margin-top: 25px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            padding-top: 20px;
+        }
+
+        .conclusion-box {
+            background: rgba(255, 255, 255, 0.08);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            border-left: 4px solid #ffeb3b;
+            font-size: 15px;
+            color: #ffffff;
+            line-height: 1.5;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            color: white;
+            font-size: 14px;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        th {
+            background: rgba(0, 182, 255, 0.2);
+            color: #00ffd5;
+            font-weight: bold;
+        }
+
+        tr:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="box" id="mainBox">
+        <h1>Tính Lãi Suất Tiết Kiệm</h1>
+
+        <label>Số tiền vốn (đồng)</label>
+        <!-- Đã chuyển sang type="text" và thêm hàm tự động chấm hàng nghìn -->
+        <input type="text" id="von" placeholder="Ví dụ: 100.000.000" oninput="dinhDangTien(this)">
+
+        <label>Lãi suất tự nhập (%/năm)</label>
+        <input type="number" id="laiSuat" placeholder="Ví dụ: 6.0">
+
+        <label>Thời gian gửi (tháng)</label>
+        <input type="number" id="thoiGian" placeholder="Ví dụ: 12">
+
+        <div class="btn-group">
+            <button class="btn-main" onclick="tinhTien()">TÍNH NGAY</button>
+            <button class="btn-compare" id="compareBtn" onclick="soSanhNganHang()">SO SÁNH VỚI NGÂN HÀNG UY TÍN</button>
+        </div>
+
+        <div class="ketqua">
+            <p id="lai"></p>
+            <p id="tong"></p>
+        </div>
+
+        <div class="compare-section" id="compareSection">
+            <div class="conclusion-box" id="ketLuan"></div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Ngân hàng</th>
+                        <th>Lãi suất</th>
+                        <th>Tiền lãi nhận được</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <!-- Data render ở đây -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        function dinhDangTien(input) {
+            let giaTri = input.value.replace(/\D/g, "");
+            if (giaTri) {
+                input.value = Number(giaTri).toLocaleString("vi-VN");
+            } else {
+                input.value = "";
+            }
+        }
+        const danhSachNganHang = [
+            { name: "Vietcombank (Big 4)", rates: { 3: 2.4, 6: 3.5, 12: 5.9, 24: 6.0 } },
+            { name: "BIDV (Big 4)", rates: { 3: 2.4, 6: 3.5, 12: 5.9, 24: 6.0 } },
+            { name: "VietinBank (Big 4)", rates: { 3: 2.4, 6: 3.5, 12: 5.9, 24: 6.0 } },
+            { name: "Agribank (Big 4)", rates: { 3: 2.9, 6: 4.0, 12: 5.9, 24: 6.0 } },
+            { name: "Techcombank", rates: { 3: 4.35, 6: 6.05, 12: 6.25, 24: 5.35 } },
+            { name: "MB Bank (Quân Đội)", rates: { 3: 4.1, 6: 4.6, 12: 6.3, 24: 7.2 } },
+            { name: "ACB (Á Châu)", rates: { 3: 4.4, 6: 4.5, 12: 5.3, 24: 5.4 } }
+        ];
+
+        let soTienVon = 0;
+        let soThangGui = 0;
+
+        function tinhTien() {
+            let chuoiTienVon = document.getElementById("von").value;
+            soTienVon = parseFloat(chuoiTienVon.replace(/\./g, "")); 
+
+            let laiSuatNhap = parseFloat(document.getElementById("laiSuat").value);
+            soThangGui = parseFloat(document.getElementById("thoiGian").value);
+
+            if (isNaN(soTienVon) || isNaN(laiSuatNhap) || isNaN(soThangGui)) {
+                alert("Vui lòng nhập đầy đủ tất cả các thông tin!");
+                return;
+            }
+
+            let tienLai = (soTienVon * laiSuatNhap / 12 / 100) * soThangGui;
+            let tongTien = tienLai + soTienVon;
+
+            document.getElementById("lai").innerHTML = "Số tiền lãi là: <span class='highlight'>" + tienLai.toLocaleString('vi-VN') + " đồng</span>";
+            document.getElementById("tong").innerHTML = "Tổng tiền nhận được là: <span class='highlight'>" + tongTien.toLocaleString('vi-VN') + " đồng</span>";
+
+            document.getElementById("compareSection").style.display = "none";
+            document.getElementById("compareBtn").style.display = "block";
+        }
+
+        function soSanhNganHang() {
+            let kyHanChuan = 12; 
+            if (soThangGui <= 4) kyHanChuan = 3;
+            else if (soThangGui <= 8) kyHanChuan = 6;
+            else if (soThangGui <= 18) kyHanChuan = 12;
+            else kyHanChuan = 24;
+
+            let dataSoSanh = danhSachNganHang.map(nh => {
+                let laiSuatNganHang = nh.rates[kyHanChuan];
+                let laiDuKien = (soTienVon * laiSuatNganHang / 12 / 100) * soThangGui;
+                return {
+                    name: nh.name,
+                    rate: laiSuatNganHang,
+                    lai: laiDuKien
+                };
+            });
+
+            dataSoSanh.sort((x, y) => y.rate - x.rate);
+
+            let htmlTable = "";
+            dataSoSanh.forEach(nh => {
+                htmlTable += `<tr>
+                    <td>${nh.name}</td>
+                    <td class="highlight">${nh.rate}%/năm</td>
+                    <td>${Math.round(nh.lai).toLocaleString('vi-VN')} đ</td>
+                </tr>`;
+            });
+            document.getElementById("tableBody").innerHTML = htmlTable;
+
+            let nganHangTotNhat = dataSoSanh[0];
+            let thongBaoKyHan = (soThangGui !== kyHanChuan) ? ` (áp dụng cho mốc kỳ hạn chuẩn gần nhất là ${kyHanChuan} tháng)` : '';
+            
+            document.getElementById("ketLuan").innerHTML = `💡 <b>Kết luận:</b> Với thời hạn gửi <span class="highlight-gold">${soThangGui} tháng</span>${thongBaoKyHan}, bạn nên lựa chọn gửi tiết kiệm tại ngân hàng <b>${nganHangTotNhat.name}</b> để nhận được mức lãi suất ưu đãi nhất là <span class="highlight-gold">${nganHangTotNhat.rate}%/năm</span>, số tiền lãi thu về ước tính khoảng <span class="highlight-gold">${Math.round(nganHangTotNhat.lai).toLocaleString('vi-VN')} đồng</span>.`;
+
+            document.getElementById("compareSection").style.display = "block";
+        }
+    </script>
+
+</body>
+</html>

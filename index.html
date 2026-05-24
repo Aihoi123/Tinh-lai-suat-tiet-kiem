@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tính Lãi Suất Tiết Kiệm & So Sánh Ngân Hàng</title>
+    <title>Tính Lãi Suất Tiết Kiệm & So Sánh Ngân Hàng (Lãi Kép)</title>
 
     <style>
         * {
@@ -166,14 +166,13 @@
 <body>
 
     <div class="box" id="mainBox">
-        <h1>Tính Lãi Suất Tiết Kiệm</h1>
+        <h1>Tính Lãi Suất Tiết Kiệm (Lãi Kép)</h1>
 
         <label>Số tiền vốn (đồng)</label>
-        <!-- Đã chuyển sang type="text" và thêm hàm tự động chấm hàng nghìn -->
         <input type="text" id="von" placeholder="Ví dụ: 100.000.000" oninput="dinhDangTien(this)">
 
         <label>Lãi suất tự nhập (%/năm)</label>
-        <input type="number" id="laiSuat" placeholder="Ví dụ: 6.0">
+        <input type="number" id="laiSuat" placeholder="Ví dụ: 6.0" step="0.1">
 
         <label>Thời gian gửi (tháng)</label>
         <input type="number" id="thoiGian" placeholder="Ví dụ: 12">
@@ -199,8 +198,7 @@
                     </tr>
                 </thead>
                 <tbody id="tableBody">
-                    <!-- Data render ở đây -->
-                </tbody>
+                    </tbody>
             </table>
         </div>
     </div>
@@ -214,6 +212,7 @@
                 input.value = "";
             }
         }
+
         const danhSachNganHang = [
             { name: "Vietcombank (Big 4)", rates: { 3: 2.4, 6: 3.5, 12: 5.9, 24: 6.0 } },
             { name: "BIDV (Big 4)", rates: { 3: 2.4, 6: 3.5, 12: 5.9, 24: 6.0 } },
@@ -239,11 +238,12 @@
                 return;
             }
 
-            let tienLai = (soTienVon * laiSuatNhap / 12 / 100) * soThangGui;
-            let tongTien = tienLai + soTienVon;
+            // ÁP DỤNG CÔNG THỨC LÃI KÉP THEO THÁNG
+            let tongTien = soTienVon * Math.pow((1 + (laiSuatNhap / 12 / 100)), soThangGui);
+            let tienLai = tongTien - soTienVon;
 
-            document.getElementById("lai").innerHTML = "Số tiền lãi là: <span class='highlight'>" + tienLai.toLocaleString('vi-VN') + " đồng</span>";
-            document.getElementById("tong").innerHTML = "Tổng tiền nhận được là: <span class='highlight'>" + tongTien.toLocaleString('vi-VN') + " đồng</span>";
+            document.getElementById("lai").innerHTML = "Số tiền lãi là: <span class='highlight'>" + Math.round(tienLai).toLocaleString('vi-VN') + " đồng</span>";
+            document.getElementById("tong").innerHTML = "Tổng tiền nhận được là: <span class='highlight'>" + Math.round(tongTien).toLocaleString('vi-VN') + " đồng</span>";
 
             document.getElementById("compareSection").style.display = "none";
             document.getElementById("compareBtn").style.display = "block";
@@ -258,7 +258,11 @@
 
             let dataSoSanh = danhSachNganHang.map(nh => {
                 let laiSuatNganHang = nh.rates[kyHanChuan];
-                let laiDuKien = (soTienVon * laiSuatNganHang / 12 / 100) * soThangGui;
+                
+                // ÁP DỤNG CÔNG THỨC LÃI KÉP TRONG BẢNG SO SÁNH
+                let tongTienDuKien = soTienVon * Math.pow((1 + (laiSuatNganHang / 12 / 100)), soThangGui);
+                let laiDuKien = tongTienDuKien - soTienVon;
+
                 return {
                     name: nh.name,
                     rate: laiSuatNganHang,
